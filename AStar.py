@@ -53,5 +53,3 @@ heuristics = calculate_heuristic(genotypes)
 
 open_list = []
 closed_list = []
-
-while open_list != []:
