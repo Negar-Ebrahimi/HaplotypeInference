@@ -1,4 +1,4 @@
-from random import randint
+import random
 import math
 
 
@@ -46,17 +46,109 @@ def fitness(individual):
 
 def initial_population():
     population = []
-    initial_population_size = 2  # This can be changed
+    initial_population_size = 4  # This can be changed
     for index in range(initial_population_size):
         individual = ()
         for genotype in genotypes:
             if resolutions_size(genotype) > 0:
-                individual = individual + (randint(1, resolutions_size(genotype)) - 1,)
+                individual = individual + (random.randint(1, resolutions_size(genotype)) - 1,)
             else:
                 individual = individual + (0,)  # This genotype has no recessive allele and has one identical resolution
 
         population.append(individual)
     return population
+
+
+def selection():
+    most_fit_individual_1_index = -1
+    most_fit_individual_1_score = 0
+
+    most_fit_individual_2_index = -1
+    most_fit_individual_2_score = 0
+
+    for individual_index in range(len(population)):
+        individual = population[individual_index]
+        if fitness(individual) > most_fit_individual_1_score:
+            most_fit_individual_2_index = most_fit_individual_1_index
+            most_fit_individual_2_score = most_fit_individual_1_score
+            most_fit_individual_1_index = individual_index
+            most_fit_individual_1_score = fitness(individual)
+
+        elif individual_index != most_fit_individual_1_index and fitness(individual) > most_fit_individual_2_score:
+            most_fit_individual_2_index = individual_index
+            most_fit_individual_2_score = fitness(individual)
+    return [population[most_fit_individual_1_index], population[most_fit_individual_2_index]]
+
+
+def crossover(selected_parents):
+    crossover_point = random.randint(0, len(genotypes) - 2)
+    offspring_1 = ()
+    offspring_2 = ()
+    for genotype_index in range(len(genotypes)):
+        if genotype_index <= crossover_point:
+            offspring_1 = offspring_1 + (selected_parents[1][genotype_index],)
+            offspring_2 = offspring_2 + (selected_parents[0][genotype_index],)
+        else:
+            offspring_1 = offspring_1 + (selected_parents[0][genotype_index],)
+            offspring_2 = offspring_2 + (selected_parents[1][genotype_index],)
+    # Mutation section
+    offspring_1 = mutation(offspring_1)
+    offspring_2 = mutation(offspring_2)
+
+    population.append(offspring_1)
+    population.append(offspring_2)
+
+    # keep the population size fixed
+    kill_the_least_fit()
+    kill_the_least_fit()
+
+    return population
+
+
+def mutation(offspring):
+    mutation_probability = 0.30
+    number_of_being_mutated_genotypes = 2
+    offspring_list = list(offspring)  # We can't change the values of the tuple DS, but the list DS is okay with that
+    if random.random() < mutation_probability:
+        for iterator in range(number_of_being_mutated_genotypes):
+            genotype_index = random.randint(0, len(genotypes) - 1)
+            if resolutions_size(genotypes[genotype_index]) > 0:
+                offspring_list[genotype_index] = random.randint(1, resolutions_size(genotypes[genotype_index])) - 1
+    return tuple(offspring_list)
+
+
+def kill_the_least_fit():
+    least_fit_individual_index = -1
+    least_fit_individual_score = 2*len(genotypes)+1
+
+    for individual_index in range(len(population)):
+        individual = population[individual_index]
+        if fitness(individual) < least_fit_individual_score:
+            least_fit_individual_index = individual_index
+            least_fit_individual_score = fitness(individual)
+
+    del population[least_fit_individual_index]
+    return population
+
+def total_score():
+    total_score = 0
+    for individual in population:
+        total_score += fitness(individual)
+    return total_score
+
+
+def max_fit():
+    most_fit_individual_index = -1
+    most_fit_individual_score = 0
+
+    for individual_index in range(len(population)):
+        individual = population[individual_index]
+        if fitness(individual) > most_fit_individual_score:
+            most_fit_individual_index = individual_index
+            most_fit_individual_score = fitness(individual)
+    return population[most_fit_individual_index]
+
+# def is_converged(): ?
 
 
 # extracting the input data
@@ -66,6 +158,14 @@ with open("SmallSampleInput.txt") as file:
     for line in file:  # read rest of lines
         genotypes.append([int(x) for x in line.split()])
 
-    sample_individual = initial_population()[0]
+    population = initial_population()
+    max_fit_score = 0
+    # population is gonna change globally through every generation
 
-    print(fitness(sample_individual))
+    number_of_generations = 100
+    i = 1
+    for i in range(number_of_generations):
+        crossover(selection())
+        if max_fit_score < fitness(max_fit()):
+            max_fit_score = fitness(max_fit())
+    print('Minimum number of Haplotypes covering all those genotypes is: ', 2*len(genotypes) - max_fit_score)
