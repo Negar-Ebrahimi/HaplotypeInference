@@ -34,18 +34,15 @@ def expand_resolution(genotype, resolution_number):
     return [haplotype_mother, haplotype_father]
 
 
-def expand_successors(path):
-    successor_genotype_index = current_node['genotype-index'] + 1
+def expand_successors(node):
+    successor_genotype_index = node['genotype-index'] + 1
     being_expanded_genotype = genotypes[successor_genotype_index]
 
-    min_successor_index = 0
-    print(successor_genotype_index)
+    successors = ()
     for successor_index in range(resolutions_size(being_expanded_genotype)):
         # reset current haplotypes
-        current_haplotypes = path
+        current_haplotypes = node['path']
 
-        print('resolution number ', successor_index)
-        print((expand_resolution(being_expanded_genotype, successor_index)))
         # temporary addition of the mother haplotype of this resolution to the path
         current_haplotypes = current_haplotypes + (expand_resolution(being_expanded_genotype, successor_index)[0],)
 
@@ -54,38 +51,52 @@ def expand_successors(path):
 
         # check for improvement of f-cost
         successor_g_cost = successor_genotype_index + 1
-        successor_heuristic_value = len(set(current_haplotypes)) - len(set(path))
+        successor_heuristic_value = 2*(len(genotypes) - 1 - successor_genotype_index) + len(set(current_haplotypes))
         successor_f_cost = successor_g_cost + successor_heuristic_value
-        print('f-cost: ', len(set(current_haplotypes)))
-        if successor_f_cost <= current_node['f-cost']:
-            current_node['genotype-index'] = successor_genotype_index
-            current_node['resolution-number'] = successor_index
-            current_node['f-cost'] = successor_f_cost
-            # the f-limit remains the same
 
-        # check for improvement of the f-limit
-        if successor_f_cost <= current_node['f-limit']:
-            current_node['f-limit'] = successor_f_cost
-            alternative_node['genotype-index'] = successor_genotype_index
-            alternative_node['resolution-number'] = successor_genotype_index
+        successor = {'genotype-index': successor_genotype_index,
+                     'resolution-number': successor_index,
+                     'path': current_haplotypes,
+                     'f-cost': successor_f_cost}
+        successors = successors + (successor, )
 
-    return True
+    return successors
 
 
-def recursive_breadth_first_search():
-    path = () # current set of inferred haplotypes
-    while current_node['genotype-index'] < len(genotypes) - 1:
-        expand_successors(path)
-        print('current node', current_node)
-        # permanently addition of the mother haplotype of this resolution to the path
-        path = path + (expand_resolution(genotypes[current_node['genotype-index']],
-                                         current_node['resolution-number'])[0],)
-        # permanently addition of the father haplotype of this resolution to the path
-        path = path + (expand_resolution(genotypes[current_node['genotype-index']],
-                                         current_node['resolution-number'])[1],)
-        print('path', path)
+def best_successor(successors):
+    best_successor_index = 0
+    for successor_index in range(len(successors)):
+        # This successor is better than current best
+        if successors[successor_index]['f-cost'] < successors[best_successor_index]['f-cost']:
+            best_successor_index = successor_index
+    return successors[best_successor_index]
 
-    return path
+
+def alternative_successor(successors):
+    best_successor_index = best_successor(successors)['resolution-number']
+    alternative_successor_index = best_successor_index + 1
+    for successor_index in range(len(successors)):
+        # This successor is better than current best
+        if successors[successor_index]['f-cost'] < successors[best_successor_index]['f-cost']\
+                and successor_index != best_successor_index:
+            alternative_successor_index = successor_index
+    return successors[alternative_successor_index]
+
+
+def recursive_breadth_first_search(node, f_limit):
+    if node['genotype-index'] == len(genotypes) - 1:
+        return ['success', node]
+
+    successors = expand_successors(node)
+    while 1:
+        best = best_successor(successors)
+        if best['f-cost'] > f_limit:
+            return ['failure', best]
+        alternative = alternative_successor(successors)
+        result = recursive_breadth_first_search(best, min(f_limit, alternative['f-cost']))
+        if result[0] == 'success':
+            return result[1]
+        print('nashod')
 
 
 # extracting the input data
@@ -95,12 +106,10 @@ with open("searchSampleInput.txt") as file:
     for line in file:  # read rest of lines
         genotypes.append([int(x) for x in line.split()])
 
-    alternative_node = {'genotype-index': -1,
-                        'resolution-number': 0}
-
-    current_node = {'genotype-index': -1,
+    initial_node = {'genotype-index': -1,
                     'resolution-number': 0,
-                    'f-cost': 0,
-                    'f-limit': 0}
+                    'path': (),
+                    'f-cost': 4*len(genotypes)}
 
-    print('Search finished with this f-cost: ', len(set(recursive_breadth_first_search())))
+    print('Search finished with this f-cost: ', recursive_breadth_first_search(initial_node, 4*len(genotypes)))
+    # 4*genotypes_size is used as infinity
