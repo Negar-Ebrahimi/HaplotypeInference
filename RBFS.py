@@ -85,29 +85,25 @@ def alternative_successor(successors):
 
 def recursive_breadth_first_search(node, f_limit):
     if node['genotype-index'] == len(genotypes) - 1:
-        print('reached end of the tree with f-cost: ', node['f-cost'])
-        return ['success', node['f-cost']]
+        return ['success', node]
 
     successors = expand_successors(node)
-    print('-----------------')
-    for successor in successors:
-        print('( ', successor['genotype-index'], ' , ', successor['resolution-number'], ' )')
-        print('path: ', successor['path'])
-        print('f-cost', successor['f-cost'])
-    print('f-limit: ', f_limit)
     while 1:
         best = successors[best_successor_index(successors)]
         if best['f-cost'] > f_limit:
-            return ['failure', best['f-cost']]
+            return ['failure', best]
         alternative = alternative_successor(successors)
         result = recursive_breadth_first_search(best, min(f_limit, alternative['f-cost']))
+        unwinding_node = result[1]
         successors_list = list(successors)
-        successors_list[best_successor_index(successors)]['f-cost'] = result[1]
+        successors_list[best_successor_index(successors)] = unwinding_node
         successors = tuple(successors_list)
         if result[0] == 'success':
             return result
 
 
+# ToDo: increasing the value of this path cost coefficient makes g greater and therefore,
+# the exploration approaches to a more BFS-like process than a DFS-like one.
 path_cost_coefficient = 1
 
 # extracting the input data
@@ -122,6 +118,9 @@ with open("searchSampleInput.txt") as file:
                     'path': (),
                     'f-cost': 4*len(genotypes)}
 
-    print('Search finished with this f-cost: ',
-          recursive_breadth_first_search(initial_node, (path_cost_coefficient+3)*len(genotypes))[1] - path_cost_coefficient*len(genotypes))
     # (path_cost_coefficient+3)*len(genotype) is used as an infinity value for initial f-limit
+    initial_f_limit = (path_cost_coefficient + 3)*len(genotypes)
+
+    final_haplotypes_set = set(recursive_breadth_first_search(initial_node, initial_f_limit)[1]['path'])
+    print('The minimum-sized inferred haplotypes set is: ', set(final_haplotypes_set))
+    print('Number of haplotypes is: ', len(final_haplotypes_set))
