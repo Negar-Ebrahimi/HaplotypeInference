@@ -46,7 +46,7 @@ def fitness(individual):
 
 def initial_population():
     population = []
-    initial_population_size = 4  # This can be changed
+    initial_population_size = 100  # This can be changed
     for index in range(initial_population_size):
         individual = ()
         for genotype in genotypes:
@@ -162,6 +162,7 @@ with open("SmallSampleInput.txt") as file:
     max_fit_score = 0
     # population is gonna change globally through every generation
 
+# todo: repeat selection M times
     number_of_generations = 100
     i = 1
     for i in range(number_of_generations):

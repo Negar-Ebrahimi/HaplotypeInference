@@ -100,6 +100,7 @@ haplotypes = initial_state(genotypes)
 # the hill climbing loop
 for heuristic_index in range(len(heuristics)):
     heuristic = heuristics[heuristic_index]
+    # todo: change the probability formula
     if number_of_diverse_haplotypes(toggle(haplotypes, heuristic[0])) >= number_of_diverse_haplotypes(haplotypes) and random.random() > 0.1/(heuristic_index + 1):
         # it means this is a flat area and we should stop climbing the hill!
         print('The optimal number of this haplotype inference base on parsimony using hill simulated '
