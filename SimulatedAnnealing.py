@@ -87,24 +87,28 @@ def toggle(haplotypes, genotype_index):
 
     return haplotypes
 
-# extracting the input data
-with open("SampleInput.txt") as file:
-    n, m = [int(x) for x in next(file).split()]
-    genotypes = []
-    for line in file:  # read rest of lines
-        genotypes.append([int(x) for x in line.split()])
 
-heuristics = calculate_heuristic(genotypes)
-haplotypes = initial_state(genotypes)
+answers = []
+for l in range(100):
+    # extracting the input data
+    with open("SmallSampleInput.txt") as file:
+        n, m = [int(x) for x in next(file).split()]
+        genotypes = []
+        for line in file:  # read rest of lines
+            genotypes.append([int(x) for x in line.split()])
 
-# the hill climbing loop
-for heuristic_index in range(len(heuristics)):
-    heuristic = heuristics[heuristic_index]
-    # todo: change the probability formula
-    if number_of_diverse_haplotypes(toggle(haplotypes, heuristic[0])) >= number_of_diverse_haplotypes(haplotypes) and random.random() > 0.1/(heuristic_index + 1):
-        # it means this is a flat area and we should stop climbing the hill!
-        print('The optimal number of this haplotype inference base on parsimony using hill simulated '
-              'annealing method is: ', number_of_diverse_haplotypes(haplotypes))
-        break
+    heuristics = calculate_heuristic(genotypes)
+    haplotypes = initial_state(genotypes)
 
-    haplotypes = toggle(haplotypes, heuristic[0])
+    # the hill climbing loop
+    for heuristic_index in range(len(heuristics)):
+        heuristic = heuristics[heuristic_index]
+        # todo: change the probability formula
+        if number_of_diverse_haplotypes(toggle(haplotypes, heuristic[0])) >= number_of_diverse_haplotypes(haplotypes) and random.random() > 0.1/(heuristic_index + 1):
+            # it means this is a flat area and we should stop climbing the hill!
+            answers.append(number_of_diverse_haplotypes(haplotypes))
+            break
+
+        haplotypes = toggle(haplotypes, heuristic[0])
+
+print(answers)

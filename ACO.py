@@ -84,17 +84,21 @@ def assign_agent():
     return total_score
 
 
-# extracting the input data
-with open("SmallSampleInput.txt") as file:
-    n, m = [int(x) for x in next(file).split()]
-    genotypes = []
-    for line in file:  # read rest of lines
-        genotypes.append([int(x) for x in line.split()])
+answers = []
+for l in range(100):
+    # extracting the input data
+    with open("SmallSampleInput.txt") as file:
+        n, m = [int(x) for x in next(file).split()]
+        genotypes = []
+        for line in file:  # read rest of lines
+            genotypes.append([int(x) for x in line.split()])
 
-    scores = []
-    initial_scoring(genotypes)
+        scores = []
+        initial_scoring(genotypes)
 
-    # for 40 ants
-    for i in range(40):
-        print('total score: ', assign_agent())
-
+        # for 40 ants
+        arr = []
+        for i in range(50):
+            arr.append(2*len(genotypes) - assign_agent())
+        answers.append(min(arr))
+print(answers)

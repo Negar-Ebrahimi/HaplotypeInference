@@ -1,5 +1,6 @@
 import random
 
+
 def calculate_heuristic(genotypes):
     heuristic = []
     for genotype_index in range(len(genotypes)):
@@ -88,28 +89,35 @@ def toggle(haplotypes, genotype_index):
     return haplotypes
 
 
-# extracting the input data
-with open("searchSampleInput.txt") as file:
-    n, m = [int(x) for x in next(file).split()]
-    genotypes = []
-    for line in file:  # read rest of lines
-        genotypes.append([int(x) for x in line.split()])
+answers = []
+for l in range(100):
+    # extracting the input data
+    with open("SmallSampleInput.txt") as file:
+        n, m = [int(x) for x in next(file).split()]
+        genotypes = []
+        for line in file:  # read rest of lines
+            genotypes.append([int(x) for x in line.split()])
 
-heuristics = calculate_heuristic(genotypes)
-haplotypes = initial_state(genotypes)
+    heuristics = calculate_heuristic(genotypes)
+    haplotypes = initial_state(genotypes)
 
-# the hill climbing loop
+    # the hill climbing loop
+    for heuristic in heuristics:
+        if number_of_diverse_haplotypes(toggle(haplotypes, heuristic[0])) >= number_of_diverse_haplotypes(haplotypes):
+            # it means this is a flat area and we should stop climbing the hill!
+            answers.append(number_of_diverse_haplotypes(haplotypes))
+            break
+        haplotypes = toggle(haplotypes, heuristic[0])
 
-best_set_of_diverse_haplotypes = haplotypes
-best_number_of_diverse_haplotypes = number_of_diverse_haplotypes(haplotypes)
-for i in range(100):
-    genotype_index = random.randint(0, len(genotypes) - 1)
-    toggled_haplotypes = toggle(best_set_of_diverse_haplotypes, genotype_index)
-    if number_of_diverse_haplotypes(toggled_haplotypes) < best_number_of_diverse_haplotypes:
-        best_set_of_diverse_haplotypes = toggled_haplotypes
-        best_number_of_diverse_haplotypes = number_of_diverse_haplotypes(toggled_haplotypes)
-        # it means this is a flat area and we should stop climbing the hill!
+    # best_set_of_diverse_haplotypes = haplotypes
+    # best_number_of_diverse_haplotypes = number_of_diverse_haplotypes(haplotypes)
+    # for i in range(100):
+    #     genotype_index = random.randint(0, len(genotypes) - 1)
+    #     toggled_haplotypes = toggle(best_set_of_diverse_haplotypes, genotype_index)
+    #     if number_of_diverse_haplotypes(toggled_haplotypes) < best_number_of_diverse_haplotypes:
+    #         best_set_of_diverse_haplotypes = toggled_haplotypes
+    #         best_number_of_diverse_haplotypes = number_of_diverse_haplotypes(toggled_haplotypes)
+    #         # it means this is a flat area and we should stop climbing the hill!
 
-print('The optimal number of this haplotype inference base on parsimony using hill climbing method is: ',
-      number_of_diverse_haplotypes(haplotypes))
+print(answers)
 

@@ -107,7 +107,7 @@ def recursive_breadth_first_search(node, f_limit):
 path_cost_coefficient = 1
 
 # extracting the input data
-with open("searchSampleInput.txt") as file:
+with open("SmallSampleInput.txt") as file:
     n, m = [int(x) for x in next(file).split()]
     genotypes = []
     for line in file:  # read rest of lines
@@ -121,6 +121,7 @@ with open("searchSampleInput.txt") as file:
     # (path_cost_coefficient+3)*len(genotype) is used as an infinity value for initial f-limit
     initial_f_limit = (path_cost_coefficient + 3)*len(genotypes)
 
-    final_haplotypes_set = set(recursive_breadth_first_search(initial_node, initial_f_limit)[1]['path'])
-    print('The minimum-sized inferred haplotypes set is: ', set(final_haplotypes_set))
-    print('Number of haplotypes is: ', len(final_haplotypes_set))
+    for i in range(10):
+        final_haplotypes_set = set(recursive_breadth_first_search(initial_node, initial_f_limit)[1]['path'])
+        print('The minimum-sized inferred haplotypes set is: ', set(final_haplotypes_set))
+        print('Number of haplotypes is: ', len(final_haplotypes_set))

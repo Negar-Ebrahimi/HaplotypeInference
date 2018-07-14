@@ -130,6 +130,7 @@ def kill_the_least_fit():
     del population[least_fit_individual_index]
     return population
 
+
 def total_score():
     total_score = 0
     for individual in population:
@@ -151,22 +152,27 @@ def max_fit():
 # def is_converged(): ?
 
 
-# extracting the input data
-with open("SmallSampleInput.txt") as file:
-    n, m = [int(x) for x in next(file).split()]
-    genotypes = []
-    for line in file:  # read rest of lines
-        genotypes.append([int(x) for x in line.split()])
+answers = []
+for l in range(10):
+    # extracting the input data
+    with open("SmallSampleInput.txt") as file:
+        n, m = [int(x) for x in next(file).split()]
+        genotypes = []
+        for line in file:  # read rest of lines
+            genotypes.append([int(x) for x in line.split()])
 
-    population = initial_population()
-    max_fit_score = 0
-    # population is gonna change globally through every generation
+        population = initial_population()
+        max_fit_score = 0
+        # population is gonna change globally through every generation
 
-# todo: repeat selection M times
-    number_of_generations = 100
-    i = 1
-    for i in range(number_of_generations):
-        crossover(selection())
-        if max_fit_score < fitness(max_fit()):
-            max_fit_score = fitness(max_fit())
-    print('Minimum number of Haplotypes covering all those genotypes is: ', 2*len(genotypes) - max_fit_score)
+        number_of_generations = 50
+        number_of_selections = 5
+        i = 1
+        for i in range(number_of_generations):
+            for r in range(number_of_selections):
+                crossover(selection())
+                if max_fit_score < fitness(max_fit()):
+                    max_fit_score = fitness(max_fit())
+        answers.append(2*len(genotypes) - max_fit_score)
+
+print(answers)
